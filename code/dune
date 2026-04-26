@@ -1,0 +1,25 @@
+(library
+ (name project_lockfree_sync_dual_queue)
+ (modules lockfree_sync_dual_queue))
+
+(library
+ (name project_lockfree_exchanger)
+ (modules lockfree_exchanger))
+
+(library
+ (name project_lock_sync_dual_queue)
+ (modules lock_sync_dual_queue))
+
+(executable
+ (name test_manual)
+ (modules test_manual)
+ (libraries project_lockfree_sync_dual_queue project_lockfree_exchanger project_lock_sync_dual_queue))
+
+(executable
+ (name benchmark)
+ (modules benchmark)
+ (libraries
+  unix
+  project_lockfree_sync_dual_queue
+  project_lock_sync_dual_queue
+  project_lockfree_exchanger))

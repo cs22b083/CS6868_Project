@@ -1,0 +1,17 @@
+# dune exec ./benchmark.exe -- 100000 results/benchmark.csv
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /Users/kadamrohan/.cache/dune/db
+# Workspace root:
+# /Users/kadamrohan/Documents/ROHAN/Academics/Sem8/CS6868/CS6868_Project
+# Auto-detected concurrency: 8
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /Users/kadamrohan/.opam/5.4.0+tsan/bin/ocamlc.opt -config > /var/folders/j4/g968v69d6_95_fh9hkcvcr5m0000gn/T/dune_4ac3d5_output
