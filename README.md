@@ -1,102 +1,131 @@
-# Research Mini-Project
+## Project 23: Synchronous Dual Queue
 
-The research mini-project is worth **16%** of the final grade and is done in
-groups of **3**. The project should involve implementing a concurrent algorithm
-or data structure that is **not discussed in class** but is related to the
-course objectives. The implementation language is flexible — it need not be
-OCaml 5.
+**Difficulty: ★★★★☆** — Reservation nodes and rendezvous coordination on top of the Michael-Scott queue structure require complex CAS logic.
 
-See [`project_ideas.md`](project_ideas.md) for the list of 27 suggested project
-topics, and [`report-template/`](report-template/) for the LaTeX template you
-must use for the written report.
+### Background
 
-## Use of LLMs
+The standard concurrent queue from Lecture 08 is **asynchronous**: an enqueuer
+always succeeds immediately, even if no dequeuer is waiting. A **synchronous
+queue** requires that an enqueuer and a dequeuer rendezvous — neither completes
+until matched with a partner. This is useful for handoff-style coordination
+(e.g., Go channels, Java's `SynchronousQueue`). Scherer, Lea, and Scott (2009)
+designed a **dual queue** that unifies both modes: if the queue is empty or
+contains only waiters of the same type, an arriving thread enqueues a
+**reservation** (a node representing an unfulfilled request); when a complementary
+thread arrives, it fulfils the reservation and both proceed. The dual queue is
+lock-free and linearizable, built on the Michael-Scott queue structure from
+Lecture 08 with reservation nodes.
 
-You are expected to use LLMs (e.g., GitHub Copilot, ChatGPT, Claude) as part of
-your workflow. We strongly recommend signing up for [GitHub Copilot for
-Education](https://docs.github.com/en/copilot/managing-copilot/managing-copilot-as-an-individual-subscriber/managing-your-copilot-subscription/getting-free-access-to-copilot-as-a-student-teacher-or-maintainer),
-which is free for students.
+### Tasks
 
-**However:** while an LLM may generate code, **you are responsible for every
-line it produces.** You must review and understand all LLM-generated code
-before submitting it. During the Q&A after the presentation, an answer of
-*"the LLM generated it, I don't know what it does"* will receive the lowest
-marks possible.
+1. Implement a **lock-free synchronous dual queue** in OCaml 5. The queue holds
+   nodes of two types: DATA (an enqueuer waiting for a dequeuer) and REQUEST (a
+   dequeuer waiting for an enqueuer). An arriving thread checks the tail: if the
+   queue is empty or contains nodes of its own type, it enqueues a reservation
+   and spins/parks until fulfilled; otherwise, it fulfils the head reservation
+   using CAS.
+2. Implement a **simple synchronous exchanger** (pair up two threads using a
+   single `Atomic` slot with CAS, as in the elimination array from Lecture 08)
+   as a simpler baseline.
+3. Implement a **mutex + condition variable synchronous queue** as a blocking
+   baseline: the enqueuer waits on a condition variable until a dequeuer arrives,
+   and vice versa.
+4. Verify correctness using **QCheck-Lin**: model as a sequential synchronous
+   queue where `enqueue(v)` blocks until matched with a `dequeue()` that
+   returns `v`. The linearization point is the moment of rendezvous.
+5. Run **TSAN** on the lock-free implementation.
+6. Benchmark rendezvous throughput (matched pairs/sec) across 2–8 threads under:
+   (a) balanced (equal enqueuers and dequeuers), (b) enqueue-heavy, and
+   (c) dequeue-heavy configurations.
+7. Apply the synchronous dual queue to implement a simple **producer-consumer
+   pipeline** (e.g., a parallel map where producers generate work items and
+   consumers process them with direct handoff, no buffering).
 
-The report must include a dedicated **Reflection on the use of LLMs** section
-(see the template): which models/tools you used, what worked well, what
-didn't, what surprised you, and what was difficult. This reflection is graded
-as part of the report.
+### Research Question
 
-## Deliverables
+How does the lock-free dual queue's rendezvous throughput compare against a
+mutex/condition-based synchronous queue, and does the overhead of reservation
+nodes pay off at higher thread counts?
 
-Every project must produce three deliverables:
+### References
 
-1. **Implementation** — working code for a concurrency problem not covered in
-   lectures, with tests and/or evaluation demonstrating correctness and
-   performance.
-2. **Written report** — 5–10 pages, written with the provided LaTeX
-   template ([`report-template/`](report-template/)). The report should cover:
-   goals of the project, tasks undertaken, evaluation, reflection on the use
-   of LLMs, and conclusions. The report **must** list the contributions of
-   each group member in terms of percentages.
-3. **Presentation** — a **recorded video submission**, exactly **10 minutes**
-   long, with **one group member** presenting on behalf of the group. Q&A will
-   happen separately (in person or over Slack/video call) with the whole
-   group — every member must be able to answer questions about any part of
-   the work. See [Recording & hosting the video](#recording--hosting-the-video)
-   below for suggested tools.
+- W. N. Scherer III, D. Lea, M. L. Scott, "Scalable Synchronous Queues," *CACM*, 2009
+- AoMPP Chapter 10, Section 10.6.1 (A Naïve Synchronous Queue)
+- Java `SynchronousQueue` source code
 
-Code, report, and video (or a link to the video) must be submitted as a single
-GitHub repository. The repository **must contain the LaTeX sources** of the
-report (`.tex`, `.bib`, any figures) alongside the compiled `report.pdf` — not
-just the PDF. Add the link to your GitHub repository in the "GitHub repo"
-column of the project sign-up sheet.
+## Repository Layout
 
-## Recording & hosting the video
+- `code/lockfree_sync_dual_queue.ml` — lock-free synchronous dual queue
+- `code/lock_sync_dual_queue.ml` — mutex + condition-variable baseline
+- `code/lockfree_exchanger.ml` — single-slot exchanger baseline
+- `code/test_manual.ml` — direct concurrent sanity tests
+- `code/benchmark.ml` — rendezvous throughput benchmark
+- `code/producer_consumer_pipeline/pipeline_demo.ml` — producer-consumer direct handoff demo
+- `report-template/` — report sources
 
-**Recording.** Any tool that captures slides + narration is fine. Suggestions:
+## Build and Run
 
-- [OBS Studio](https://obsproject.com/) — free, cross-platform, records
-  screen + webcam overlay. Good default.
-- **Keynote** or **PowerPoint** built-in "record slideshow" — simplest if
-  you only need slides + voice.
-- **Zoom** — start a meeting with only yourself, enable "record to this
-  computer", and share your screen.
+Run all commands from `code/`.
 
-**Hosting.** Do **not** commit the video file to your GitHub repo — a
-10-minute 1080p video can be several hundred MB and will bloat the
-repository. Instead:
+Build:
 
-- Upload to **YouTube** as an **Unlisted** video (free, no size or length
-  limits, easy to share).
-- Or upload to **Google Drive** on your `@smail.iitm.ac.in` account and
-  share the link with "anyone with the link can view".
+```sh
+make build
+```
 
-Put the video link prominently in your repository's top-level `README.md`.
+Manual tests:
 
-## Grading Rubric (out of 16 marks)
+```sh
+make test-manual
+```
 
-| Component | Marks | What we look for |
-|---|---|---|
-| Challenge of the problem undertaken | 3 | Ambition, novelty, relevance to course topics. Each project in `project_ideas.md` has a difficulty rating (★ to ★★★★★). **Higher-difficulty projects receive higher marks in this component even if completion is partial.** |
-| Progress made towards the challenge | 5 | Working implementation, depth of evaluation, evidence of effort |
-| Written report | 5 | Clarity, technical depth, proper evaluation, LLM reflection, contribution breakdown |
-| Presentation | 3 | Clear explanation, good use of the 10 minutes, Q&A over Slack |
+QCheck-Lin executable:
 
-## Important Dates
+```sh
+make test-qcheck
+```
 
-| Task | Date |
-|---|---|
-| Project topic approval | 30/03/2026 |
-| Report, code & video submission | 29/04/2026 |
+All tests currently wired in the Makefile:
 
-Fill in your group members and chosen project topic in the
-[sign-up sheet](https://docs.google.com/spreadsheets/d/1kINa3ipNcyxAqh1wXC9_65xeZg25QFDirSUEqUU3IyA/edit?gid=0#gid=0)
-by the topic approval deadline.
+```sh
+make test
+```
 
-## Proposing your own topic
+Benchmark:
 
-You are free to propose your own topic (subject to instructor approval). If
-you are presenting a new project topic, make a PR against `project_ideas.md`
-adding your proposal in the same format as the existing entries.
+```sh
+make benchmark
+```
+
+This writes CSV output to `code/results/benchmark.csv`.
+
+For a smaller benchmark run:
+
+```sh
+dune exec ./benchmark.exe -- 1000 results/benchmark-debug.csv
+```
+
+Pipeline demo:
+
+```sh
+make pipeline
+```
+
+## TSAN
+
+Use the TSAN-enabled OCaml switch, then run from `code/`:
+
+```sh
+dune exec ./test_manual.exe
+```
+
+If you want to capture the TSAN output:
+
+```sh
+mkdir -p results
+dune exec ./test_manual.exe 2>&1 | tee results/tsan-test-manual.txt
+```
+
+## Video
+
+Presentation link: `TBD`

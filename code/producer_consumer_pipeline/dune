@@ -1,0 +1,4 @@
+(executable
+ (name pipeline_demo)
+ (modules pipeline_demo)
+ (libraries project_lockfree_sync_dual_queue))

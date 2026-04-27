@@ -1,4 +1,4 @@
-.PHONY: all build test test-manual test-qcheck benchmark clean help
+.PHONY: all build test test-manual test-qcheck benchmark pipeline clean help
 
 all: build
 
@@ -20,6 +20,10 @@ benchmark:
 	@echo "=== Running rendezvous throughput benchmark ==="
 	dune exec ./benchmark.exe -- 100000 results/benchmark.csv
 
+pipeline:
+	@echo "=== Running producer-consumer pipeline demo ==="
+	dune exec ./producer_consumer_pipeline/pipeline_demo.exe
+
 clean:
 	dune clean
 
@@ -30,4 +34,5 @@ help:
 	@echo "  make test-manual  - Run manual rendezvous tests"
 	@echo "  make test-qcheck  - Run QCheck linearizability tests"
 	@echo "  make benchmark    - Run rendezvous throughput benchmark"
+	@echo "  make pipeline     - Run producer-consumer pipeline demo"
 	@echo "  make clean        - Remove build artifacts"
