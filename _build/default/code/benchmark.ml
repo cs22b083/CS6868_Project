@@ -4,7 +4,7 @@ module Exchanger = Project_lockfree_exchanger.Lockfree_exchanger
 
 type workload =
   | Balanced
-  | Enqueue_heavy
+  | Enqueue_heavy (* Number of puts and takes same but different producers and consumers ??  *)
   | Dequeue_heavy
 
 type implementation = {
