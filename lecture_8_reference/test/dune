@@ -1,0 +1,100 @@
+(executable
+ (name test_bounded_queue)
+ (modules test_bounded_queue)
+ (libraries bounded_queue unix))
+
+(executable
+ (name test_bounded_queue_split_counter)
+ (modules test_bounded_queue_split_counter)
+ (libraries bounded_queue_split_counter unix))
+
+(executable
+ (name qcheck_lin_bounded_queue)
+ (modules qcheck_lin_bounded_queue)
+ (libraries bounded_queue qcheck-lin.domain))
+
+(executable
+ (name qcheck_lin_bounded_queue_split_counter)
+ (modules qcheck_lin_bounded_queue_split_counter)
+ (libraries bounded_queue_split_counter qcheck-lin.domain))
+
+(executable
+ (name qcheck_stm_bounded_queue)
+ (modules qcheck_stm_bounded_queue)
+ (libraries bounded_queue qcheck-stm.sequential qcheck-stm.domain qcheck-multicoretests-util))
+
+(executable
+ (name qcheck_stm_bounded_queue_split_counter)
+ (modules qcheck_stm_bounded_queue_split_counter)
+ (libraries bounded_queue_split_counter qcheck-stm.sequential qcheck-stm.domain qcheck-multicoretests-util))
+
+(executable
+ (name test_lockfree_queue)
+ (modules test_lockfree_queue)
+ (libraries lockfree_queue unix))
+
+(executable
+ (name qcheck_lin_lockfree_queue)
+ (modules qcheck_lin_lockfree_queue)
+ (libraries lockfree_queue qcheck-lin.domain))
+
+(executable
+ (name qcheck_stm_lockfree_queue)
+ (modules qcheck_stm_lockfree_queue)
+ (libraries lockfree_queue qcheck-stm.sequential qcheck-stm.domain qcheck-multicoretests-util))
+
+(executable
+ (name test_lockfree_stack)
+ (modules test_lockfree_stack)
+ (libraries lockfree_stack unix))
+
+(executable
+ (name qcheck_lin_lockfree_stack)
+ (modules qcheck_lin_lockfree_stack)
+ (libraries lockfree_stack qcheck-lin.domain))
+
+(executable
+ (name qcheck_stm_lockfree_stack)
+ (modules qcheck_stm_lockfree_stack)
+ (libraries lockfree_stack qcheck-stm.sequential qcheck-stm.domain qcheck-multicoretests-util))
+
+(executable
+ (name test_lockfree_stack_builtin_list)
+ (modules test_lockfree_stack_builtin_list)
+ (libraries lockfree_stack_builtin_list unix))
+
+(executable
+ (name qcheck_lin_lockfree_stack_builtin_list)
+ (modules qcheck_lin_lockfree_stack_builtin_list)
+ (libraries lockfree_stack_builtin_list qcheck-lin.domain))
+
+(executable
+ (name qcheck_stm_lockfree_stack_builtin_list)
+ (modules qcheck_stm_lockfree_stack_builtin_list)
+ (libraries lockfree_stack_builtin_list qcheck-stm.sequential qcheck-stm.domain qcheck-multicoretests-util))
+
+(executable
+ (name test_elimination_backoff_stack)
+ (modules test_elimination_backoff_stack)
+ (libraries elimination_backoff_stack unix))
+
+(executable
+ (name qcheck_lin_elimination_backoff_stack)
+ (modules qcheck_lin_elimination_backoff_stack)
+ (libraries elimination_backoff_stack qcheck-lin.domain))
+
+(executable
+ (name qcheck_stm_elimination_backoff_stack)
+ (modules qcheck_stm_elimination_backoff_stack)
+ (libraries elimination_backoff_stack qcheck-stm.sequential qcheck-stm.domain qcheck-multicoretests-util))
+
+(executable
+ (name benchmark_stacks)
+ (modules benchmark_stacks)
+ (libraries lockfree_stack_builtin_list elimination_backoff_stack unix))
+
+(executable
+ (name benchmark_queues)
+ (modules benchmark_queues)
+ (libraries bounded_queue bounded_queue_split_counter lockfree_queue unix))
+
