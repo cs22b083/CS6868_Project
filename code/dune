@@ -23,3 +23,9 @@
   project_lockfree_sync_dual_queue
   project_lock_sync_dual_queue
   project_lockfree_exchanger))
+
+(executable
+ (name qcheck_lin)
+ (modules qcheck_lin)
+ (libraries
+ project_lock_sync_dual_queue qcheck-lin.domain)) 

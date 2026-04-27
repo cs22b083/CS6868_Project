@@ -76,3 +76,32 @@ let take q =
       in
       Mutex.unlock q.mutex;
       value
+
+let try_put q value =
+  Mutex.lock q.mutex;
+  match Queue.take_opt q.consumers with
+  | Some consumer ->
+      (* A consumer is waiting, complete immediately *)
+      consumer.value <- Some value;
+      Condition.signal consumer.condition;
+      Mutex.unlock q.mutex;
+      true
+  | None ->
+      (* No consumer available, don't block *)
+      Mutex.unlock q.mutex;
+      false
+
+let try_take q =
+  Mutex.lock q.mutex;
+  match Queue.take_opt q.producers with
+  | Some producer ->
+      (* A producer is waiting, complete immediately *)
+      let value = producer.value in
+      producer.taken <- true;
+      Condition.signal producer.condition;
+      Mutex.unlock q.mutex;
+      Some value
+  | None ->
+      (* No producer available, don't block *)
+      Mutex.unlock q.mutex;
+      None

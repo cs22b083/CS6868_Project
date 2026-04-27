@@ -1,4 +1,4 @@
-# dune exec ./test_manual.exe
+# dune exec ./qcheck_lin.exe
 # OCAMLPARAM: unset
 # Shared cache: enabled-except-user-rules
 # Shared cache location: /Users/kadamrohan/.cache/dune/db
@@ -14,4 +14,4 @@
 #  ; build_dir = In_build_dir "default"
 #  ; instrument_with = []
 #  }
-$ /Users/kadamrohan/.opam/5.4.0+tsan/bin/ocamlc.opt -config > /var/folders/j4/g968v69d6_95_fh9hkcvcr5m0000gn/T/dune_f5fdea_output
+$ /Users/kadamrohan/.opam/5.4.0+tsan/bin/ocamlc.opt -config > /var/folders/j4/g968v69d6_95_fh9hkcvcr5m0000gn/T/dune_5d1e57_output

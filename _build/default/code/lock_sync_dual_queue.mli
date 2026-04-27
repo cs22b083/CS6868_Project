@@ -12,3 +12,13 @@ val put : 'a t -> 'a -> unit
 
 val take : 'a t -> 'a
 (** [take q] waits until it receives a value from one [put]. *)
+
+val try_put : 'a t -> 'a -> bool
+(** [try_put q v] attempts to hand [v] to a waiting [take].
+    Returns [true] if successful, [false] if no consumer is waiting.
+    Never blocks. *)
+
+val try_take : 'a t -> 'a option
+(** [try_take q] attempts to receive a value from a waiting [put].
+    Returns [Some value] if successful, [None] if no producer is waiting.
+    Never blocks. *)
