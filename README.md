@@ -128,4 +128,4 @@ dune exec ./test_manual.exe 2>&1 | tee results/tsan-test-manual.txt
 
 ## Video
 
-Presentation link: `TBD`
+Presentation link: (https://drive.google.com/file/d/1aIuSQzYdGzsPMEeV5cVNROHXHKKhm8lk/view?usp=sharing)
