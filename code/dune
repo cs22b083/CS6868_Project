@@ -28,4 +28,4 @@
  (name qcheck_lin)
  (modules qcheck_lin)
  (libraries
- project_lock_sync_dual_queue qcheck-lin.domain)) 
+ project_lockfree_sync_dual_queue qcheck-lin.domain)) 

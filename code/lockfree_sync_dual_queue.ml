@@ -97,6 +97,38 @@ let wait_until_fulfilled node =
   in
   loop ()
 
+let rec try_put q value =
+  help_advance_head q;
+  let first = Atomic.get q.head in
+  match Atomic.get first.next with
+  | Some ({ kind = Request; item; _ } as request) ->
+      (* Non-blocking fast path: complete only when a waiting request exists. *)
+      if Atomic.compare_and_set item None (Some value) then begin
+        ignore (Atomic.compare_and_set q.head first request);
+        true
+      end else
+        try_put q value
+  | _ -> false
+
+let rec try_take q =
+  help_advance_head q;
+  let first = Atomic.get q.head in
+  match Atomic.get first.next with
+  | Some ({ kind = Data; item; _ } as data) -> begin
+      match Atomic.get item with
+      | Some value as current ->
+          (* Non-blocking fast path: complete only when a waiting data node exists. *)
+          if Atomic.compare_and_set item current None then begin
+            ignore (Atomic.compare_and_set q.head first data);
+            Some value
+          end else
+            try_take q
+      | None ->
+          ignore (Atomic.compare_and_set q.head first data);
+          try_take q
+    end
+  | _ -> None
+
 
 
 let rec put q value =
@@ -138,7 +170,7 @@ let rec take q =
             value
           end else
             take q
-      | None ->
+      | None -> (*impossible since there is help_advance_head before start*)
           ignore (Atomic.compare_and_set q.head first data);
           take q
     end

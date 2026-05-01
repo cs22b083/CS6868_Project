@@ -12,3 +12,12 @@ val put : 'a t -> 'a -> unit
 
 val take : 'a t -> 'a
 (** [take q] waits until it receives a value from one [put]. *)
+
+val try_put : 'a t -> 'a -> bool
+(** [try_put q v] is non-blocking.
+    Returns [true] if [v] is handed to a waiting [take], [false] otherwise. *)
+
+val try_take : 'a t -> 'a option
+(** [try_take q] is non-blocking.
+    Returns [Some v] if a waiting [put] is matched, [None] otherwise. *)
+

@@ -1,29 +1,15 @@
-(** QCheck-Lin Linearizability Test for BoundedQueue
+(** QCheck-Lin Linearizability Test for LockFreeSyncDualQueue
 
-    This test verifies that the bounded queue is linearizable
-    under concurrent access. We use the non-blocking [try_enq]
-    and [try_deq] operations since the blocking variants would
-    cause deadlocks during linearizability checking.
-
-    The queue uses separate locks for enqueue and dequeue, so
-    linearizability is maintained by the atomic size counter
-    coordinating between the two ends.
-
-    == Expected Result ==
-
-    This test should PASS. The lock-based design with atomic
-    coordination ensures linearizability.
+    Uses non-blocking [try_put]/[try_take] to avoid deadlocks in the
+    linearizability checker while still exercising lock-free rendezvous logic.
 *)
 
-module BQ = Project_lock_sync_dual_queue.Lock_sync_dual_queue
+module LQ = Project_lockfree_sync_dual_queue.Lockfree_sync_dual_queue
 
-(** Lin API specification for the bounded queue.
-    Uses a capacity of 8 to allow interesting interleavings
-    while keeping the state space manageable. *)
-module BQSig = struct
-  type t = int BQ.t
+module LQSig = struct
+  type t = int LQ.t
 
-  let init () = BQ.create ()
+  let init () = LQ.create ()
 
   let cleanup _ = ()
 
@@ -31,15 +17,15 @@ module BQSig = struct
 
   let int_small = nat_small
 
-  (** API: non-blocking operations only *)
   let api =
-    [ val_ "try_put" BQ.try_put (t @-> int_small @-> returning bool);
-      val_ "try_take" BQ.try_take (t @-> returning (option int)); ]
+    [
+      val_ "try_put" LQ.try_put (t @-> int_small @-> returning bool);
+      val_ "try_take" LQ.try_take (t @-> returning (option int));
+    ]
 end
 
-module BQ_domain = Lin_domain.Make(BQSig)
+module LQ_domain = Lin_domain.Make (LQSig)
 
 let () =
-  QCheck_base_runner.run_tests_main [
-    BQ_domain.lin_test ~count:500 ~name:"BoundedQueue linearizability";
-  ]
+  QCheck_base_runner.run_tests_main
+    [ LQ_domain.lin_test ~count:500 ~name:"LockFreeSyncDualQueue linearizability" ]
